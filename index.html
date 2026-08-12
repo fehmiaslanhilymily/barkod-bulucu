@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Barkod Bulucu</title>
+  <!-- html5-qrcode kütüphanesi -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #f8f9fa;
+      margin: 0;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      font-size: 26px;
+      margin: 0 0 8px 0;
+      color: #1a1a2e;
+    }
+    .sub {
+      text-align: center;
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      color: #2d3436;
+    }
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .input-group input {
+      flex: 1;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 2px solid #dfe6e9;
+      border-radius: 10px;
+      outline: none;
+      transition: 0.2s;
+    }
+    .input-group input:focus {
+      border-color: #0984e3;
+    }
+    .btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary {
+      background: #0984e3;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0873c7;
+    }
+    .btn-primary:disabled {
+      background: #b2bec3;
+      cursor: not-allowed;
+    }
+    .btn-danger {
+      background: #e17055;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #d63031;
+    }
+    .btn-success {
+      background: #00b894;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #00a381;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .btn-group .btn {
+      flex: 1;
+    }
+    #scanner-box {
+      background: #2d3436;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 12px 0;
+      display: none;
+      position: relative;
+    }
+    #scanner-box video {
+      width: 100%;
+      display: block;
+    }
+    #scanner-box .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 3px solid rgba(255,255,255,0.5);
+      width: 80%;
+      height: 40%;
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    #result-area {
+      margin: 16px 0;
+      padding: 14px;
+      background: #f1f2f6;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 18px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .found {
+      background: #00b894 !important;
+      color: white !important;
+      font-weight: 700;
+      animation: pulse 0.6s ease 3;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+    #found-list {
+      margin-top: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .found-item {
+      background: #dff6f0;
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .found-item .badge {
+      background: #00b894;
+      color: white;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .status {
+      font-size: 14px;
+      color: #636e72;
+      margin-top: 4px;
+      text-align: center;
+    }
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #e17055;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>📦 Barkod Bulucu</h1>
+  <div class="sub">Kamera ile tarayıp aradığınız barkodu bulun</div>
+
+  <label for="searchInput">🔍 Aranacak barkod numarası</label>
+  <div class="input-group">
+    <input type="text" id="searchInput" placeholder="Örn: 8691234567890" />
+    <button class="btn btn-primary" id="startBtn">Başlat</button>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-danger" id="stopBtn" disabled>⏹ Durdur</button>
+    <button class="btn btn-success" id="clearBtn">🗑 Temizle</button>
+  </div>
+
+  <div id="scanner-box">
+    <div class="overlay"></div>
+  </div>
+
+  <div id="result-area">📷 Taramayı başlatmak için "Başlat"a tıklayın.</div>
+
+  <div id="found-list">
+    <div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>
+  </div>
+
+  <div class="status" id="statusMsg"></div>
+</div>
+
+<script>
+  (function() {
+    // DOM elemanları
+    const searchInput = document.getElementById('searchInput');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const scannerBox = document.getElementById('scanner-box');
+    const resultArea = document.getElementById('result-area');
+    const foundList = document.getElementById('found-list');
+    const statusMsg = document.getElementById('statusMsg');
+
+    let html5QrCode = null;
+    let isScanning = false;
+    let targetBarcode = '';
+    let foundItems = [];   // bulunan barkod listesi
+
+    // ---- Sesli uyarı (Web Audio ile bip) ----
+    function playBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.frequency.value = 880;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.2);
+      } catch(e) {
+        // sessiz geç
+      }
+    }
+
+    // ---- Bulunan listesini güncelle ----
+    function updateFoundList() {
+      if (foundItems.length === 0) {
+        foundList.innerHTML = `<div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>`;
+        return;
+      }
+      let html = '';
+      foundItems.forEach(item => {
+        html += `
+          <div class="found-item">
+            <span>✅ ${item}</span>
+            <span class="badge">bulundu</span>
+          </div>
+        `;
+      });
+      foundList.innerHTML = html;
+    }
+
+    // ---- Yeni bir barkod bulunduğunda ----
+    function onBarcodeDetected(decodedText) {
+      statusMsg.textContent = 'Okunan: ' + decodedText;
+      if (!targetBarcode) {
+        resultArea.innerHTML = `⚠️ Önce bir barkod numarası girin.`;
+        return;
+      }
+
+      if (decodedText === targetBarcode) {
+        // Eşleşti
+        if (!foundItems.includes(decodedText)) {
+          foundItems.push(decodedText);
+          updateFoundList();
+          playBeep();
+          resultArea.innerHTML = `🎉 <strong>BULUNDU!</strong> ${decodedText}`;
+          resultArea.className = 'found';
+        } else {
+          // Zaten bulunmuş, yine de uyarı ver
+          playBeep();
+          resultArea.innerHTML = `⚠️ Zaten bulunmuştu: ${decodedText}`;
+          resultArea.className = 'found';
+        }
+      } else {
+        resultArea.innerHTML = `🔍 Okunan: ${decodedText} (eşleşmedi)`;
+        resultArea.className = '';
+      }
+    }
+
+    // ---- Taramayı başlat ----
+    function startScanner() {
+      targetBarcode = searchInput.value.trim();
+      if (!targetBarcode) {
+        alert('Lütfen aramak istediğiniz barkod numarasını yazın.');
+        return;
+      }
+
+      if (isScanning) {
+        stopScanner();
+      }
+
+      // Önceki sonuçları temizle (bulunanlar listesini sıfırlamıyoruz, isteğe bağlı)
+      // Ama kullanıcı yeni arama yapıyorsa eski bulgular dursun mu? Karar size kalmış.
+      // Ben temizleyelim dedim:
+      foundItems = [];
+      updateFoundList();
+      resultArea.innerHTML = '📸 Kamera başlatılıyor...';
+      resultArea.className = '';
+      statusMsg.textContent = 'Kamera açılıyor, izin verin...';
+
+      scannerBox.style.display = 'block';
+
+      html5QrCode = new Html5Qrcode("scanner-box");
+
+      const config = {
+        fps: 15,
+        qrbox: { width: 280, height: 200 },
+        aspectRatio: 1.0
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText, decodedResult) => {
+          onBarcodeDetected(decodedText);
+        },
+        (errorMessage) => {
+          // Herhangi bir hata oluşursa (ör. barkod okunamadı) sessiz geç
+          // Ama kullanıcıya sürekli hata göstermemek için
+        }
+      ).then(() => {
+        isScanning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        statusMsg.textContent = '✅ Tarama aktif, barkodları okumaya başlayın.';
+        resultArea.innerHTML = '📡 Barkod bekleniyor...';
+      }).catch((err) => {
+        console.error(err);
+        alert('Kamera başlatılamadı: ' + err);
+        stopScanner();
+      });
+    }
+
+    // ---- Taramayı durdur ----
+    function stopScanner() {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+          scannerBox.style.display = 'none';
+          isScanning = false;
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+          statusMsg.textContent = '⏹ Tarama durduruldu.';
+          resultArea.innerHTML = '⏹ Tarama durduruldu.';
+          resultArea.className = '';
+        }).catch(err => {
+          console.warn('Durdurma hatası:', err);
+        });
+      } else {
+        scannerBox.style.display = 'none';
+        isScanning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }
+
+    // ---- Temizle (bulunanları ve sonuçları sıfırla) ----
+    function clearAll() {
+      foundItems = [];
+      updateFoundList();
+      resultArea.innerHTML = '🗑 Temizlendi. Yeni arama yapabilirsiniz.';
+      resultArea.className = '';
+      statusMsg.textContent = '';
+      searchInput.value = '';
+      if (isScanning) {
+        stopScanner();
+      }
+    }
+
+    // ---- Event bağlantıları ----
+    startBtn.addEventListener('click', startScanner);
+    stopBtn.addEventListener('click', stopScanner);
+    clearBtn.addEventListener('click', clearAll);
+
+    // Sayfa kapanırken durdur
+    window.addEventListener('beforeunload', function() {
+      if (isScanning) {
+        stopScanner();
+      }
+    });
+
+    // Başlangıçta listeyi göster
+    updateFoundList();
+
+  })();
+</script>
+</body>
+</html>

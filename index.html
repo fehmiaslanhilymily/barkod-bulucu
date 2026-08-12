@@ -1,431 +1,440 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Barkod Bulucu</title>
-  <!-- html5-qrcode kütüphanesi -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    body {
-      background: #f8f9fa;
-      margin: 0;
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .container {
-      max-width: 500px;
-      width: 100%;
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      font-size: 26px;
-      margin: 0 0 8px 0;
-      color: #1a1a2e;
-    }
-    .sub {
-      text-align: center;
-      color: #6c757d;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-      color: #2d3436;
-    }
-    .input-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .input-group input {
-      flex: 1;
-      padding: 12px 14px;
-      font-size: 16px;
-      border: 2px solid #dfe6e9;
-      border-radius: 10px;
-      outline: none;
-      transition: 0.2s;
-    }
-    .input-group input:focus {
-      border-color: #0984e3;
-    }
-    .btn {
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btn-primary {
-      background: #0984e3;
-      color: white;
-    }
-    .btn-primary:hover {
-      background: #0873c7;
-    }
-    .btn-primary:disabled {
-      background: #b2bec3;
-      cursor: not-allowed;
-    }
-    .btn-danger {
-      background: #e17055;
-      color: white;
-    }
-    .btn-danger:hover {
-      background: #d63031;
-    }
-    .btn-success {
-      background: #00b894;
-      color: white;
-    }
-    .btn-success:hover {
-      background: #00a381;
-    }
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      margin: 12px 0;
-    }
-    .btn-group .btn {
-      flex: 1;
-    }
-
-    /* ----- KAMERA EKRANI (SCANNER) ----- */
-    #scanner-box {
-      background: #2d3436;
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 12px 0;
-      display: none;
-      position: relative;
-      transition: all 0.2s;
-    }
-    #scanner-box video {
-      width: 100%;
-      display: block;
-    }
-    #scanner-box .overlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 3px solid rgba(255,255,255,0.3);
-      width: 80%;
-      height: 40%;
-      border-radius: 12px;
-      pointer-events: none;
-      transition: all 0.2s;
-    }
-
-    /* --- KIRMIZI YANIP SÖNME (BARKOD BULUNDUĞUNDA) --- */
-    #scanner-box.found-scanner {
-      animation: blink-red 0.4s ease 5;
-      border: 4px solid red;
-    }
-    #scanner-box.found-scanner .overlay {
-      border-color: red !important;
-      box-shadow: 0 0 30px red;
-    }
-    @keyframes blink-red {
-      0% { border-color: red; box-shadow: 0 0 30px red; }
-      50% { border-color: transparent; box-shadow: none; }
-      100% { border-color: red; box-shadow: 0 0 30px red; }
-    }
-
-    /* Sonuç alanı da kırmızı olsun */
-    .found {
-      background: #e17055 !important;
-      color: white !important;
-      font-weight: 700;
-      animation: pulse 0.6s ease 3;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-      100% { transform: scale(1); }
-    }
-
-    #result-area {
-      margin: 16px 0;
-      padding: 14px;
-      background: #f1f2f6;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 18px;
-      min-height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    #found-list {
-      margin-top: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .found-item {
-      background: #dff6f0;
-      padding: 8px 14px;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .found-item .badge {
-      background: #00b894;
-      color: white;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-    }
-    .status {
-      font-size: 14px;
-      color: #636e72;
-      margin-top: 4px;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Barkod Bulucu - Hızlı Sürüm</title>
+    <!-- Quagga2 Kütüphanesi (daha hızlı ve uzak mesafe için) -->
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.2/dist/quagga.min.js">
+    </script>
+    <style>
+        /* --- MEVCUT STILLERINIZI AYNEN KORUYUN --- */
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f8f9fa;
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin: 0 0 8px 0;
+            color: #1a1a2e;
+        }
+        .sub {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+            color: #2d3436;
+        }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 16px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-group input:focus {
+            border-color: #0984e3;
+        }
+        .btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: #0984e3;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0873c7;
+        }
+        .btn-primary:disabled {
+            background: #b2bec3;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            background: #e17055;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #d63031;
+        }
+        .btn-success {
+            background: #00b894;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #00a381;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .btn-group .btn {
+            flex: 1;
+        }
+        #scanner-box {
+            background: #2d3436;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 12px 0;
+            display: none;
+            position: relative;
+            transition: all 0.2s;
+            min-height: 300px;
+        }
+        #scanner-box video {
+            width: 100%;
+            display: block;
+        }
+        #scanner-box .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            width: 80%;
+            height: 40%;
+            border-radius: 12px;
+            pointer-events: none;
+            transition: all 0.2s;
+        }
+        /* KIRMIZI YANIP SÖNME EFEKTİ */
+        #scanner-box.found-scanner {
+            animation: blink-red 0.4s ease 5;
+            border: 4px solid red;
+        }
+        #scanner-box.found-scanner .overlay {
+            border-color: red !important;
+            box-shadow: 0 0 30px red;
+        }
+        @keyframes blink-red {
+            0% { border-color: red; box-shadow: 0 0 30px red; }
+            50% { border-color: transparent; box-shadow: none; }
+            100% { border-color: red; box-shadow: 0 0 30px red; }
+        }
+        #result-area {
+            margin: 16px 0;
+            padding: 14px;
+            background: #f1f2f6;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .found {
+            background: #e17055 !important;
+            color: white !important;
+            font-weight: 700;
+            animation: pulse 0.6s ease 3;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        #found-list {
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .found-item {
+            background: #dff6f0;
+            padding: 8px 14px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .found-item .badge {
+            background: #00b894;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .status {
+            font-size: 14px;
+            color: #636e72;
+            margin-top: 4px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <h1>📦 Barkod Bulucu</h1>
-  <div class="sub">Kamera ile tarayıp aradığınız barkodu bulun</div>
+    <div class="container">
+        <h1>📦 Barkod Bulucu</h1>
+        <div class="sub">Kamera ile tarayıp aradığınız barkodu bulun</div>
 
-  <label for="searchInput">🔍 Aranacak barkod numarası</label>
-  <div class="input-group">
-    <input type="text" id="searchInput" placeholder="Örn: 8691234567890" />
-    <button class="btn btn-primary" id="startBtn">Başlat</button>
-  </div>
+        <label for="searchInput">🔍 Aranacak barkod numarası</label>
+        <div class="input-group">
+            <input type="text" id="searchInput" placeholder="Örn: 8691234567890" />
+            <button class="btn btn-primary" id="startBtn">Başlat</button>
+        </div>
 
-  <div class="btn-group">
-    <button class="btn btn-danger" id="stopBtn" disabled>⏹ Durdur</button>
-    <button class="btn btn-success" id="clearBtn">🗑 Temizle</button>
-  </div>
+        <div class="btn-group">
+            <button class="btn btn-danger" id="stopBtn" disabled>⏹ Durdur</button>
+            <button class="btn btn-success" id="clearBtn">🗑 Temizle</button>
+        </div>
 
-  <div id="scanner-box">
-    <div class="overlay"></div>
-  </div>
+        <div id="scanner-box">
+            <div class="overlay"></div>
+        </div>
 
-  <div id="result-area">📷 Taramayı başlatmak için "Başlat"a tıklayın.</div>
+        <div id="result-area">📷 Taramayı başlatmak için "Başlat"a tıklayın.</div>
 
-  <div id="found-list">
-    <div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>
-  </div>
+        <div id="found-list">
+            <div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>
+        </div>
 
-  <div class="status" id="statusMsg"></div>
-</div>
+        <div class="status" id="statusMsg"></div>
+    </div>
 
-<script>
-  (function() {
-    const searchInput = document.getElementById('searchInput');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const scannerBox = document.getElementById('scanner-box');
-    const resultArea = document.getElementById('result-area');
-    const foundList = document.getElementById('found-list');
-    const statusMsg = document.getElementById('statusMsg');
+    <script>
+        (function() {
+            // --- DOM ELEMANLARI ---
+            const searchInput = document.getElementById('searchInput');
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const scannerBox = document.getElementById('scanner-box');
+            const resultArea = document.getElementById('result-area');
+            const foundList = document.getElementById('found-list');
+            const statusMsg = document.getElementById('statusMsg');
 
-    let html5QrCode = null;
-    let isScanning = false;
-    let targetBarcode = '';
-    let foundItems = [];
+            let isScanning = false;
+            let targetBarcode = '';
+            let foundItems = [];
 
-    // Sesli uyarı (bip)
-    function playBeep() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.frequency.value = 880;
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.2);
-      } catch(e) { /* sessiz */ }
-    }
+            // --- YARDIMCI FONKSİYONLAR ---
+            function playBeep() {
+                try {
+                    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.frequency.value = 880;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.2);
+                } catch (e) { /* sessiz */ }
+            }
 
-    // 📳 Titreşim uyarısı
-    function vibratePhone() {
-      if (navigator.vibrate) {
-        navigator.vibrate(300); // 300 ms titreşim
-      }
-    }
+            function vibratePhone() {
+                if (navigator.vibrate) {
+                    navigator.vibrate(300);
+                }
+            }
 
-    // Kamera ekranında kırmızı yanıp sönme efekti
-    function flashScannerRed() {
-      scannerBox.classList.remove('found-scanner');
-      // Forced reflow (hızlı yeniden başlatmak için)
-      void scannerBox.offsetWidth;
-      scannerBox.classList.add('found-scanner');
-      // 2 saniye sonra efekti kaldır (ama tekrar bulunca yeniden başlar)
-      setTimeout(() => {
-        scannerBox.classList.remove('found-scanner');
-      }, 2500);
-    }
+            function flashScannerRed() {
+                scannerBox.classList.remove('found-scanner');
+                void scannerBox.offsetWidth;
+                scannerBox.classList.add('found-scanner');
+                setTimeout(() => {
+                    scannerBox.classList.remove('found-scanner');
+                }, 2500);
+            }
 
-    function updateFoundList() {
-      if (foundItems.length === 0) {
-        foundList.innerHTML = `<div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>`;
-        return;
-      }
-      let html = '';
-      foundItems.forEach(item => {
-        html += `
-          <div class="found-item">
-            <span>✅ ${item}</span>
-            <span class="badge">bulundu</span>
-          </div>
-        `;
-      });
-      foundList.innerHTML = html;
-    }
+            function updateFoundList() {
+                if (foundItems.length === 0) {
+                    foundList.innerHTML =
+                    `<div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>`;
+                    return;
+                }
+                let html = '';
+                foundItems.forEach(item => {
+                    html += `
+                        <div class="found-item">
+                            <span>✅ ${item}</span>
+                            <span class="badge">bulundu</span>
+                        </div>
+                    `;
+                });
+                foundList.innerHTML = html;
+            }
 
-    function onBarcodeDetected(decodedText) {
-      statusMsg.textContent = 'Okunan: ' + decodedText;
-      if (!targetBarcode) {
-        resultArea.innerHTML = `⚠️ Önce bir barkod numarası girin.`;
-        return;
-      }
+            // --- QUAGGA2 ILE BARCOD OKUMA ---
+            function onBarcodeDetected(data) {
+                // Quagga2, sonuçları 'codeResult.code' ile döndürür
+                const decodedText = data.codeResult.code;
+                if (!decodedText) return;
 
-      if (decodedText === targetBarcode) {
-        // EŞLEŞTİ !!!
-        if (!foundItems.includes(decodedText)) {
-          foundItems.push(decodedText);
-          updateFoundList();
-        }
-        // Her buluşta uyarı ver (tekrar da olsa)
-        playBeep();
-        vibratePhone();
-        flashScannerRed();
+                statusMsg.textContent = 'Okunan: ' + decodedText;
+                if (!targetBarcode) {
+                    resultArea.innerHTML = `⚠️ Önce bir barkod numarası girin.`;
+                    return;
+                }
 
-        resultArea.innerHTML = `🎉 <strong>BULUNDU!</strong> ${decodedText}`;
-        resultArea.className = 'found';
-      } else {
-        resultArea.innerHTML = `🔍 Okunan: ${decodedText} (eşleşmedi)`;
-        resultArea.className = '';
-      }
-    }
+                if (decodedText === targetBarcode) {
+                    if (!foundItems.includes(decodedText)) {
+                        foundItems.push(decodedText);
+                        updateFoundList();
+                    }
+                    playBeep();
+                    vibratePhone();
+                    flashScannerRed();
 
-    function startScanner() {
-      targetBarcode = searchInput.value.trim();
-      if (!targetBarcode) {
-        alert('Lütfen aramak istediğiniz barkod numarasını yazın.');
-        return;
-      }
+                    resultArea.innerHTML = `🎉 <strong>BULUNDU!</strong> ${decodedText}`;
+                    resultArea.className = 'found';
+                } else {
+                    resultArea.innerHTML = `🔍 Okunan: ${decodedText} (eşleşmedi)`;
+                    resultArea.className = '';
+                }
+            }
 
-      if (isScanning) {
-        stopScanner();
-      }
+            // --- TARAMA BASLATMA ---
+            function startScanner() {
+                targetBarcode = searchInput.value.trim();
+                if (!targetBarcode) {
+                    alert('Lütfen aramak istediğiniz barkod numarasını yazın.');
+                    return;
+                }
 
-      foundItems = [];
-      updateFoundList();
-      resultArea.innerHTML = '📸 Kamera başlatılıyor...';
-      resultArea.className = '';
-      statusMsg.textContent = 'Kamera açılıyor, izin verin...';
-      scannerBox.style.display = 'block';
+                if (isScanning) {
+                    stopScanner();
+                }
 
-      html5QrCode = new Html5Qrcode("scanner-box");
+                foundItems = [];
+                updateFoundList();
+                resultArea.innerHTML = '📸 Kamera başlatılıyor...';
+                resultArea.className = '';
+                statusMsg.textContent = 'Kamera açılıyor, izin verin...';
+                scannerBox.style.display = 'block';
 
-      // 🚀 HIZLI TARAMA İÇİN FPS ve QRBOX AYARLARI
-      const config = {
-        fps: 40,               // 60 da olabilir, ama 40 iyi dengedir
-        qrbox: { width: 340, height: 250 }, // daha geniş alan
-        aspectRatio: 1.0
-      };
+                // *** QUAGGA2 KONFIGURASYONU ***
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: scannerBox,
+                        constraints: {
+                            facingMode: "environment",
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        },
+                    },
+                    locator: {
+                        patchSize: "medium", // "small", "medium", "large" - buyuk patch uzak mesafe icin daha iyi
+                        halfSample: false
+                    },
+                    numOfWorkers: 4, // Performans icin is parcacigi sayisi
+                    decoder: {
+                        readers: [
+                            "ean_reader",
+                            "ean_8_reader",
+                            "code_128_reader",
+                            "code_39_reader",
+                            "upc_reader",
+                            "upc_e_reader",
+                            "codabar_reader"
+                        ]
+                    },
+                    locate: true // Barkodu otomatik bulmaya calis
+                }, function(err) {
+                    if (err) {
+                        console.error(err);
+                        alert('Kamera başlatılamadı: ' + err);
+                        stopScanner();
+                        return;
+                    }
+                    Quagga.start();
+                    isScanning = true;
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    statusMsg.textContent = '✅ Tarama aktif (Quagga2 - Hızlı Mod)';
+                    resultArea.innerHTML = '📡 Barkod bekleniyor...';
+                });
 
-      html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        (decodedText) => {
-          onBarcodeDetected(decodedText);
-        },
-        (errorMessage) => {
-          // hataları sessiz geç (çok hızlı okuma için)
-        }
-      ).then(() => {
-        isScanning = true;
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
-        statusMsg.textContent = '✅ Tarama aktif (hızlı mod)';
-        resultArea.innerHTML = '📡 Barkod bekleniyor...';
-      }).catch((err) => {
-        console.error(err);
-        alert('Kamera başlatılamadı: ' + err);
-        stopScanner();
-      });
-    }
+                // Quagga2'den gelen veriyi yakala
+                Quagga.onDetected(onBarcodeDetected);
+            }
 
-    function stopScanner() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          html5QrCode.clear();
-          scannerBox.style.display = 'none';
-          scannerBox.classList.remove('found-scanner'); // efekti temizle
-          isScanning = false;
-          startBtn.disabled = false;
-          stopBtn.disabled = true;
-          statusMsg.textContent = '⏹ Tarama durduruldu.';
-          resultArea.innerHTML = '⏹ Tarama durduruldu.';
-          resultArea.className = '';
-        }).catch(err => {
-          console.warn('Durdurma hatası:', err);
-        });
-      } else {
-        scannerBox.style.display = 'none';
-        isScanning = false;
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-      }
-    }
+            // --- TARAMA DURDURMA ---
+            function stopScanner() {
+                if (isScanning) {
+                    Quagga.stop();
+                    Quagga.offDetected(onBarcodeDetected);
+                    isScanning = false;
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    scannerBox.style.display = 'none';
+                    scannerBox.classList.remove('found-scanner');
+                    statusMsg.textContent = '⏹ Tarama durduruldu.';
+                    resultArea.innerHTML = '⏹ Tarama durduruldu.';
+                    resultArea.className = '';
+                }
+            }
 
-    function clearAll() {
-      foundItems = [];
-      updateFoundList();
-      resultArea.innerHTML = '🗑 Temizlendi. Yeni arama yapabilirsiniz.';
-      resultArea.className = '';
-      statusMsg.textContent = '';
-      searchInput.value = '';
-      scannerBox.classList.remove('found-scanner');
-      if (isScanning) {
-        stopScanner();
-      }
-    }
+            // --- TEMIZLEME ---
+            function clearAll() {
+                foundItems = [];
+                updateFoundList();
+                resultArea.innerHTML = '🗑 Temizlendi. Yeni arama yapabilirsiniz.';
+                resultArea.className = '';
+                statusMsg.textContent = '';
+                searchInput.value = '';
+                scannerBox.classList.remove('found-scanner');
+                if (isScanning) {
+                    stopScanner();
+                }
+            }
 
-    startBtn.addEventListener('click', startScanner);
-    stopBtn.addEventListener('click', stopScanner);
-    clearBtn.addEventListener('click', clearAll);
+            // --- EVENT LISTENER'LAR ---
+            startBtn.addEventListener('click', startScanner);
+            stopBtn.addEventListener('click', stopScanner);
+            clearBtn.addEventListener('click', clearAll);
 
-    window.addEventListener('beforeunload', function() {
-      if (isScanning) {
-        stopScanner();
-      }
-    });
+            window.addEventListener('beforeunload', function() {
+                if (isScanning) {
+                    stopScanner();
+                }
+            });
 
-    updateFoundList();
-  })();
-</script>
+            updateFoundList();
+        })();
+    </script>
 </body>
 </html>

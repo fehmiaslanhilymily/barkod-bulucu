@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Barkod Bulucu</title>
-  <!-- html5-qrcode kütüphanesi -->
+  <!-- html5-qrcode kütüphanesi (DOĞRU) -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     * {
@@ -234,9 +234,9 @@
     let html5QrCode = null;
     let isScanning = false;
     let targetBarcode = '';
-    let foundItems = [];   // bulunan barkod listesi
+    let foundItems = [];
 
-    // ---- Sesli uyarı (Web Audio ile bip) ----
+    // Sesli uyarı (bip)
     function playBeep() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -255,7 +255,6 @@
       }
     }
 
-    // ---- Bulunan listesini güncelle ----
     function updateFoundList() {
       if (foundItems.length === 0) {
         foundList.innerHTML = `<div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>`;
@@ -273,7 +272,6 @@
       foundList.innerHTML = html;
     }
 
-    // ---- Yeni bir barkod bulunduğunda ----
     function onBarcodeDetected(decodedText) {
       statusMsg.textContent = 'Okunan: ' + decodedText;
       if (!targetBarcode) {
@@ -282,7 +280,6 @@
       }
 
       if (decodedText === targetBarcode) {
-        // Eşleşti
         if (!foundItems.includes(decodedText)) {
           foundItems.push(decodedText);
           updateFoundList();
@@ -290,7 +287,6 @@
           resultArea.innerHTML = `🎉 <strong>BULUNDU!</strong> ${decodedText}`;
           resultArea.className = 'found';
         } else {
-          // Zaten bulunmuş, yine de uyarı ver
           playBeep();
           resultArea.innerHTML = `⚠️ Zaten bulunmuştu: ${decodedText}`;
           resultArea.className = 'found';
@@ -301,7 +297,6 @@
       }
     }
 
-    // ---- Taramayı başlat ----
     function startScanner() {
       targetBarcode = searchInput.value.trim();
       if (!targetBarcode) {
@@ -313,9 +308,6 @@
         stopScanner();
       }
 
-      // Önceki sonuçları temizle (bulunanlar listesini sıfırlamıyoruz, isteğe bağlı)
-      // Ama kullanıcı yeni arama yapıyorsa eski bulgular dursun mu? Karar size kalmış.
-      // Ben temizleyelim dedim:
       foundItems = [];
       updateFoundList();
       resultArea.innerHTML = '📸 Kamera başlatılıyor...';
@@ -335,12 +327,11 @@
       html5QrCode.start(
         { facingMode: "environment" },
         config,
-        (decodedText, decodedResult) => {
+        (decodedText) => {
           onBarcodeDetected(decodedText);
         },
         (errorMessage) => {
-          // Herhangi bir hata oluşursa (ör. barkod okunamadı) sessiz geç
-          // Ama kullanıcıya sürekli hata göstermemek için
+          // hataları sessiz geç
         }
       ).then(() => {
         isScanning = true;
@@ -355,7 +346,6 @@
       });
     }
 
-    // ---- Taramayı durdur ----
     function stopScanner() {
       if (html5QrCode) {
         html5QrCode.stop().then(() => {
@@ -378,7 +368,6 @@
       }
     }
 
-    // ---- Temizle (bulunanları ve sonuçları sıfırla) ----
     function clearAll() {
       foundItems = [];
       updateFoundList();
@@ -391,21 +380,17 @@
       }
     }
 
-    // ---- Event bağlantıları ----
     startBtn.addEventListener('click', startScanner);
     stopBtn.addEventListener('click', stopScanner);
     clearBtn.addEventListener('click', clearAll);
 
-    // Sayfa kapanırken durdur
     window.addEventListener('beforeunload', function() {
       if (isScanning) {
         stopScanner();
       }
     });
 
-    // Başlangıçta listeyi göster
     updateFoundList();
-
   })();
 </script>
 </body>

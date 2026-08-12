@@ -3,108 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Barkod Bulucu</title>
-  <!-- html5-qrcode kütüphanesi (DOĞRU) -->
+  <title>Barkod Bulucu - Hızlı</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    body {
-      background: #f8f9fa;
-      margin: 0;
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .container {
-      max-width: 500px;
-      width: 100%;
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      font-size: 26px;
-      margin: 0 0 8px 0;
-      color: #1a1a2e;
-    }
-    .sub {
-      text-align: center;
-      color: #6c757d;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-      color: #2d3436;
-    }
-    .input-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .input-group input {
-      flex: 1;
-      padding: 12px 14px;
-      font-size: 16px;
-      border: 2px solid #dfe6e9;
-      border-radius: 10px;
-      outline: none;
-      transition: 0.2s;
-    }
-    .input-group input:focus {
-      border-color: #0984e3;
-    }
-    .btn {
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btn-primary {
-      background: #0984e3;
-      color: white;
-    }
-    .btn-primary:hover {
-      background: #0873c7;
-    }
-    .btn-primary:disabled {
-      background: #b2bec3;
-      cursor: not-allowed;
-    }
-    .btn-danger {
-      background: #e17055;
-      color: white;
-    }
-    .btn-danger:hover {
-      background: #d63031;
-    }
-    .btn-success {
-      background: #00b894;
-      color: white;
-    }
-    .btn-success:hover {
-      background: #00a381;
-    }
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      margin: 12px 0;
-    }
-    .btn-group .btn {
-      flex: 1;
-    }
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body { background: #f8f9fa; margin: 0; padding: 16px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+    .container { max-width: 500px; width: 100%; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    h1 { text-align: center; font-size: 24px; margin: 0 0 8px; color: #1a1a2e; }
+    .sub { text-align: center; color: #6c757d; font-size: 14px; margin-bottom: 20px; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; color: #2d3436; }
+    .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+    .input-group input { flex: 1; padding: 12px 14px; font-size: 16px; border: 2px solid #dfe6e9; border-radius: 10px; outline: none; }
+    .input-group input:focus { border-color: #0984e3; }
+    .btn { padding: 12px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: #0984e3; color: white; }
+    .btn-primary:hover { background: #0873c7; }
+    .btn-primary:disabled { background: #b2bec3; cursor: not-allowed; }
+    .btn-danger { background: #e17055; color: white; }
+    .btn-danger:hover { background: #d63031; }
+    .btn-success { background: #00b894; color: white; }
+    .btn-success:hover { background: #00a381; }
+    .btn-group { display: flex; gap: 8px; margin: 12px 0; }
+    .btn-group .btn { flex: 1; }
+    
     #scanner-box {
       background: #2d3436;
       border-radius: 12px;
@@ -117,17 +38,43 @@
       width: 100%;
       display: block;
     }
-    #scanner-box .overlay {
+    /* Kırmızı flaş overlay */
+    #flash-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 0, 0, 0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s;
+      border-radius: 12px;
+      z-index: 10;
+    }
+    #flash-overlay.active {
+      opacity: 1;
+      animation: flashAnim 0.3s ease 3;
+    }
+    @keyframes flashAnim {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .overlay {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      border: 3px solid rgba(255,255,255,0.5);
+      border: 2px dashed rgba(255,255,255,0.3);
       width: 80%;
       height: 40%;
       border-radius: 12px;
       pointer-events: none;
+      z-index: 5;
     }
+    
     #result-area {
       margin: 16px 0;
       padding: 14px;
@@ -140,62 +87,23 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
+      transition: background 0.2s;
     }
-    .found {
-      background: #00b894 !important;
-      color: white !important;
-      font-weight: 700;
-      animation: pulse 0.6s ease 3;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-      100% { transform: scale(1); }
-    }
-    #found-list {
-      margin-top: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .found-item {
-      background: #dff6f0;
-      padding: 8px 14px;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .found-item .badge {
-      background: #00b894;
-      color: white;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-    }
-    .status {
-      font-size: 14px;
-      color: #636e72;
-      margin-top: 4px;
-      text-align: center;
-    }
-    .clear-btn {
-      background: none;
-      border: none;
-      color: #e17055;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 13px;
-    }
+    .found { background: #00b894 !important; color: white !important; font-weight: 700; animation: pulse 0.6s ease 3; }
+    .found-red { background: #e17055 !important; color: white !important; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    #found-list { margin-top: 12px; max-height: 200px; overflow-y: auto; }
+    .found-item { background: #dff6f0; padding: 8px 14px; border-radius: 8px; margin-bottom: 6px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+    .found-item .badge { background: #00b894; color: white; padding: 2px 12px; border-radius: 20px; font-size: 12px; }
+    .status { font-size: 14px; color: #636e72; margin-top: 4px; text-align: center; }
   </style>
 </head>
 <body>
 <div class="container">
   <h1>📦 Barkod Bulucu</h1>
-  <div class="sub">Kamera ile tarayıp aradığınız barkodu bulun</div>
+  <div class="sub">Hızlı tarama, uzaktan okuma, kırmızı uyarı</div>
 
-  <label for="searchInput">🔍 Aranacak barkod numarası</label>
+  <label for="searchInput">🔍 Aranacak barkod</label>
   <div class="input-group">
     <input type="text" id="searchInput" placeholder="Örn: 8691234567890" />
     <button class="btn btn-primary" id="startBtn">Başlat</button>
@@ -208,25 +116,23 @@
 
   <div id="scanner-box">
     <div class="overlay"></div>
+    <div id="flash-overlay"></div>
   </div>
 
   <div id="result-area">📷 Taramayı başlatmak için "Başlat"a tıklayın.</div>
 
-  <div id="found-list">
-    <div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div>
-  </div>
-
+  <div id="found-list"><div style="color:#b2bec3; font-size:14px; text-align:center;">Henüz bulunan barkod yok</div></div>
   <div class="status" id="statusMsg"></div>
 </div>
 
 <script>
   (function() {
-    // DOM elemanları
     const searchInput = document.getElementById('searchInput');
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
     const clearBtn = document.getElementById('clearBtn');
     const scannerBox = document.getElementById('scanner-box');
+    const flashOverlay = document.getElementById('flash-overlay');
     const resultArea = document.getElementById('result-area');
     const foundList = document.getElementById('found-list');
     const statusMsg = document.getElementById('statusMsg');
@@ -236,23 +142,29 @@
     let targetBarcode = '';
     let foundItems = [];
 
-    // Sesli uyarı (bip)
     function playBeep() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.frequency.value = 880;
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.2);
-      } catch(e) {
-        // sessiz geç
-      }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch(e) {}
+    }
+
+    // Kırmızı flaş efektini tetikle
+    function triggerFlash() {
+      flashOverlay.classList.remove('active');
+      // force reflow
+      void flashOverlay.offsetWidth;
+      flashOverlay.classList.add('active');
+      setTimeout(() => flashOverlay.classList.remove('active'), 1000);
     }
 
     function updateFoundList() {
@@ -262,12 +174,7 @@
       }
       let html = '';
       foundItems.forEach(item => {
-        html += `
-          <div class="found-item">
-            <span>✅ ${item}</span>
-            <span class="badge">bulundu</span>
-          </div>
-        `;
+        html += `<div class="found-item"><span>✅ ${item}</span><span class="badge">bulundu</span></div>`;
       });
       foundList.innerHTML = html;
     }
@@ -275,21 +182,23 @@
     function onBarcodeDetected(decodedText) {
       statusMsg.textContent = 'Okunan: ' + decodedText;
       if (!targetBarcode) {
-        resultArea.innerHTML = `⚠️ Önce bir barkod numarası girin.`;
+        resultArea.innerHTML = '⚠️ Önce bir barkod numarası girin.';
         return;
       }
 
       if (decodedText === targetBarcode) {
+        // Kırmızı flaş ve ses
+        triggerFlash();
+        playBeep();
+
         if (!foundItems.includes(decodedText)) {
           foundItems.push(decodedText);
           updateFoundList();
-          playBeep();
           resultArea.innerHTML = `🎉 <strong>BULUNDU!</strong> ${decodedText}`;
           resultArea.className = 'found';
         } else {
-          playBeep();
           resultArea.innerHTML = `⚠️ Zaten bulunmuştu: ${decodedText}`;
-          resultArea.className = 'found';
+          resultArea.className = 'found-red';
         }
       } else {
         resultArea.innerHTML = `🔍 Okunan: ${decodedText} (eşleşmedi)`;
@@ -304,40 +213,43 @@
         return;
       }
 
-      if (isScanning) {
-        stopScanner();
-      }
+      if (isScanning) stopScanner();
 
       foundItems = [];
       updateFoundList();
       resultArea.innerHTML = '📸 Kamera başlatılıyor...';
       resultArea.className = '';
-      statusMsg.textContent = 'Kamera açılıyor, izin verin...';
-
+      statusMsg.textContent = 'Kamera açılıyor...';
       scannerBox.style.display = 'block';
 
       html5QrCode = new Html5Qrcode("scanner-box");
 
+      // HIZLI TARAMA İÇİN AYARLAR
       const config = {
-        fps: 15,
-        qrbox: { width: 280, height: 200 },
-        aspectRatio: 1.0
+        fps: 30,                 // daha hızlı
+        qrbox: { width: 400, height: 300 }, // daha geniş alan
+        aspectRatio: 1.0,
+        experimentalFeatures: {
+          useBarCodeDetector: true  // Chrome'da yerli barkod okuyucu (çok hızlı)
+        },
+        // videoConstraints ile çözünürlüğü düşürüp hızlandırabiliriz
+        videoConstraints: {
+          facingMode: "environment",
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
       };
 
       html5QrCode.start(
         { facingMode: "environment" },
         config,
-        (decodedText) => {
-          onBarcodeDetected(decodedText);
-        },
-        (errorMessage) => {
-          // hataları sessiz geç
-        }
+        (decodedText) => { onBarcodeDetected(decodedText); },
+        (error) => { /* sessiz */ }
       ).then(() => {
         isScanning = true;
         startBtn.disabled = true;
         stopBtn.disabled = false;
-        statusMsg.textContent = '✅ Tarama aktif, barkodları okumaya başlayın.';
+        statusMsg.textContent = '✅ Tarama aktif, hızlı okuma için barkodları gösterin.';
         resultArea.innerHTML = '📡 Barkod bekleniyor...';
       }).catch((err) => {
         console.error(err);
@@ -357,9 +269,7 @@
           statusMsg.textContent = '⏹ Tarama durduruldu.';
           resultArea.innerHTML = '⏹ Tarama durduruldu.';
           resultArea.className = '';
-        }).catch(err => {
-          console.warn('Durdurma hatası:', err);
-        });
+        }).catch(err => console.warn(err));
       } else {
         scannerBox.style.display = 'none';
         isScanning = false;
@@ -375,21 +285,13 @@
       resultArea.className = '';
       statusMsg.textContent = '';
       searchInput.value = '';
-      if (isScanning) {
-        stopScanner();
-      }
+      if (isScanning) stopScanner();
     }
 
     startBtn.addEventListener('click', startScanner);
     stopBtn.addEventListener('click', stopScanner);
     clearBtn.addEventListener('click', clearAll);
-
-    window.addEventListener('beforeunload', function() {
-      if (isScanning) {
-        stopScanner();
-      }
-    });
-
+    window.addEventListener('beforeunload', () => { if (isScanning) stopScanner(); });
     updateFoundList();
   })();
 </script>
